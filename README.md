@@ -22,7 +22,7 @@ pm2等
 
 2，在服务器上拉取最新代码
 
-3，重启nginx,`nginx -s reload`
+3，重启nginx,`nginx -s reload`(这一步不需要)
 
 4, 访问[http://tianjian.work/nginxdoc](http://tianjian.work/nginxdoc)
 
