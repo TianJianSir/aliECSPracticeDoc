@@ -1,21 +1,84 @@
 # 阿里云服务器实践
+不是土豪,服务器只有一台,所以我们要榨干服务器,处理的方式是对使用nginx对不同的location进行反向代理。
+
+`/blog`      前端页面
+
+`/api`       后台接口
+
+`/nginxdoc`  文档展示
+
 
 ## 前端
 
 使用[create-react-app](https://github.com/facebook/create-react-app)作为脚手架，开发前端项目
 
-使用`pm2 start server.js`开启一个node服务,返回build之后的html入口文件，这里若是想提高体验的话，可以针对index.html修改,作为一个服务端渲染
+使用`pm2 start server.js`开启一个node服务,返回build之后的html入口文件。此处若是想提高体验的话，可以针对index.html修改,作为一个服务端渲染。目前的话，index.html为空。内容由js插入。
 
 nginx上将`/blog`反向代理到我们的node服务上,
 ```
 location /blog {
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header Host $host;
-            proxy_pass http://blog;
-        }
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $host;
+    proxy_pass http://blog;
+}
 ```
-因为将`/blog`代理到了node服务器，所以需要将引用资源文件的地方都加上`/blog`,这点webpack可以帮助我们,配置下config中的`publicPath:'/blog'`,不然的话，资源请求会404
+因为将`/blog`代理到了node服务器，所以需要将引用资源文件的地方都加上`/blog`。
+
+这点webpack可以帮助我们,配置下config中的`publicPath:'/blog'`,使用create_react_app的话，可以在`package.json`中加入`"homepage":"/blog"`,这个其实就是cdn的意思, webpack编译的时候所有的资源路径前都会加上这个前缀。不然的话，资源请求会404。
+
++ ### 使用redux
+m_react-redux分支 使用redux+redux-thunk(异步action),目录结构如下
+
+![image.png](https://upload-images.jianshu.io/upload_images/2448841-d7bd7cecf9e87765.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/100)
+
+主要就是增加了一个redux目录，放了action和reducer。在index.js中使用provide将整体结构包裹起来，接着在页面层次使用connect将view和data连接起来。
+```
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+import { Provider } from 'react-redux';
+import store from './redux/store';
+
+ReactDOM.render(
+    <Provider store={store}>
+        <App />
+    </Provider>,
+    document.getElementById('root')
+);
+```
+
++ ### 使用dva
+master分支,目录结构如下
+
+![image.png](https://upload-images.jianshu.io/upload_images/2448841-aeebd66fd8ed4c9a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+增加了model文件夹，存放state。
+index.js改动较大，使用了dva的规范。在页面层次还是使用connect连接view和data,开发体验要好于原生redux.
+```
+// 1. Initialize
+// 初始化dva对象的时候,要是传空的话，即使用了BrowserRouter URL后面还是会加上#/ 很丑
+const app = dva({
+    history: createHistory()
+});
+
+// 2. Plugins
+app.use(createLoading());
+
+// 3. Model
+app.model(login);
+app.model(register);
+
+// 4. Router
+app.router(router);
+
+// 5. Start
+app.start('#root');
+```
+使用dva-loading+nprocess处理转场效果
+
+page高阶函数统一处理错误收集
+
 
 ## 后台接口
 
@@ -81,7 +144,7 @@ db.inventory.updateMany(
       $set: {  "size.uom" : "cm",  "status" : "P" },
       $currentDate: { "lastModified": true }
     }
-) 
+)
 ```
 
 + 删除
@@ -106,7 +169,7 @@ db.inventory.deleteMany(
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
-// Connection URL 
+// Connection URL
 // 目前用的是const url = "mongodb://localhost:27017/";
 const url = 'mongodb+srv://$[username]:$[password]@$[hostlist]/$[database]?retryWrites=true';
 
@@ -152,15 +215,15 @@ db.collection('inventory').updateOne(
 + 删除
 
 ```
-db.collection('inventory').deleteOne({ 
-  status: "D" 
+db.collection('inventory').deleteOne({
+  status: "D"
 })
 .then(function(result) {
   // process result
 })
 
-db.collection('inventory').deleteMany({ 
-  status: "A" 
+db.collection('inventory').deleteMany({
+  status: "A"
 })
 .then(function(result) {
   // process result
@@ -173,6 +236,10 @@ nginx相关的配置，反向代理等
 
 ## 部署相关
 使用[pm2](https://github.com/Unitech/PM2/)管理node进程
+
+首次部署：`pm2 start server.js`
+
+后续部署：`pm2 restart server`
 
 ## 文档编写
 使用[docsify](https://github.com/docsifyjs/docsify)作为文档编写的工具
