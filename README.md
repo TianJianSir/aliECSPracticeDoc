@@ -241,20 +241,6 @@ nginx相关的配置，反向代理等
 
 后续部署：`pm2 restart server`
 
-## 文档编写
-使用[docsify](https://github.com/docsifyjs/docsify)作为文档编写的工具
-
->本地使用`docsify serve DOCS` 启动服务，查看效果
-
-1，在[DOCS](https://github.com/TianJianSir/DOCS.git)上,修改readme
-
-2，在服务器上拉取最新代码
-
-3，重启nginx,`nginx -s reload`(这一步不需要)
-
-4, 访问[http://tianjian.work/nginxdoc](http://tianjian.work/nginxdoc)
-
-
 ## 其他
 ### 阿里云上配置ssl
 
@@ -285,5 +271,18 @@ server{
 5,重启nginx,浏览器重新访问
 
 6,免费的证书不稳定，会造成打不开网页的假象（可以多刷新两次）,还有香港和新加坡的服务器对https的支持不是很好。
+
+### 文档编写
+使用[docsify](https://github.com/docsifyjs/docsify)作为文档编写的工具
+
+>本地使用`docsify serve DOCS` 启动服务，查看效果
+
+1，在[DOCS](https://github.com/TianJianSir/DOCS.git)上,修改readme
+
+2，在服务器上拉取最新代码
+
+3，重启nginx,`nginx -s reload`(这一步不需要)
+
+4, 访问[http://tianjian.work/nginxdoc](http://tianjian.work/nginxdoc)
 
 
