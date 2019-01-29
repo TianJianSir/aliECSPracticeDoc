@@ -242,9 +242,9 @@ nginx相关的配置，反向代理等
 后续部署：`pm2 restart server`
 
 ## 其他
-### 阿里云上配置ssl
+### 阿里云上配置https
 
-1,申请证书（阿里云上可以申请免费的，但是不稳定，当然，学习是够了）
+1,申请ssl证书（阿里云上可以申请免费的）, 申请ssl证书的时候，域名必须要填对，不然的话，使用https访问的时候，就会显示红色不安全。这是因为使用https的时候，会把你的域名和证书中的信息进行校验。一般都是填`www`, 但是`www.XX`访问不到你的网站时，此时你需要在域名解析中增加一条记录，主机记录填`www`。就可以使用www访问你的网站了
 
 2,申请完毕之后，会在ssl证书管理中看到已签发的证书，下载下来
 
@@ -252,12 +252,13 @@ nginx相关的配置，反向代理等
 ```
 scp /path/local_filename username@servername:/path
 ```
-4,修改nginx,http默认监听80端口，https默认监听443
+4,修改nginx,http默认监听80端口，https默认监听443。
+所以还需要在服务器的安全组规则中添加443端口。
 ```
 server{
   #listen 80  //若想http和https共存，将这行打开，同时注释 ssl on
   listen 443 ssl;
-  ssl on; 
+  ssl on;
   ssl_certificate "/etc/nginx/cert/cert.pem";
   ssl_certificate_key "/etc/nginx/cert/cert.key";
   ssl_session_cache shared:SSL:1m;
@@ -270,7 +271,7 @@ server{
 
 5,重启nginx,浏览器重新访问
 
-6,免费的证书不稳定，会造成打不开网页的假象（可以多刷新两次）,还有香港和新加坡的服务器对https的支持不是很好。
+6,免费的证书不稳定，当然，学习是够了
 
 ### 文档编写
 使用[docsify](https://github.com/docsifyjs/docsify)作为文档编写的工具
@@ -284,5 +285,3 @@ server{
 3，重启nginx,`nginx -s reload`(这一步不需要)
 
 4, 访问[http://tianjian.work/nginxdoc](http://tianjian.work/nginxdoc)
-
-
