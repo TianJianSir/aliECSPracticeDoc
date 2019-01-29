@@ -256,3 +256,34 @@ nginx相关的配置，反向代理等
 
 
 ## 其他
+### 阿里云上配置ssl
+
+1,申请证书（阿里云上可以申请免费的，但是不稳定，当然，学习是够了）
+
+2,申请完毕之后，会在ssl证书管理中看到已签发的证书，下载下来
+
+3,在服务器上的nginx目录下新建Cert目录，将证书传到该目录。
+```
+scp /path/local_filename username@servername:/path
+```
+4,修改nginx,http默认监听80端口，https默认监听443
+```
+server{
+  #listen 80  //若想http和https共存，将这行打开，同时注释 ssl on
+  listen 443 ssl;
+  ssl on; 
+  ssl_certificate "/etc/nginx/cert/cert.pem";
+  ssl_certificate_key "/etc/nginx/cert/cert.key";
+  ssl_session_cache shared:SSL:1m;
+  ssl_session_timeout  10m;
+  ssl_prefer_server_ciphers on;
+  ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;
+  ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+}
+```
+
+5,重启nginx,浏览器重新访问
+
+6,免费的证书不稳定，会造成打不开网页的假象（可以多刷新两次）,还有香港和新加坡的服务器对https的支持不是很好。
+
+
